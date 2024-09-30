@@ -1,13 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Net.Mime;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using TGC.MonoGame.TP.Collisions;
-using TGC.MonoGame.TP.Gizmos;
-using TGC.MonoGame.TP.Gizmos.Geometries;
 
 namespace TGC.MonoGame.TP.Pistas{
     public class Pista{
@@ -36,7 +30,7 @@ namespace TGC.MonoGame.TP.Pistas{
         }
 
         private void Initialize() {
-          
+        
             PistaRectaWorlds = new Matrix[]{
                 scale *
                     Matrix.Identity,
@@ -96,7 +90,8 @@ namespace TGC.MonoGame.TP.Pistas{
 
         }
 
-        public void Draw(GameTime gameTime, Matrix view, Matrix projection){
+        public void Draw(GameTime gameTime, Matrix view, Matrix projection)
+        {
             Effect.Parameters["View"].SetValue(view);
             Effect.Parameters["Projection"].SetValue(projection);
             Effect.Parameters["DiffuseColor"].SetValue(Color.DarkRed.ToVector3());
@@ -122,5 +117,63 @@ namespace TGC.MonoGame.TP.Pistas{
                 Gizmos.DrawCube(center, extents * 2f, Color.Red);
             }*/
         }
+
+        public void DrawPistaRecta(GameTime gameTime, Matrix view, Matrix projection, Vector3 position)
+        {
+            Effect.Parameters["View"].SetValue(view);
+            Effect.Parameters["Projection"].SetValue(projection);
+            Effect.Parameters["DiffuseColor"].SetValue(Color.DarkRed.ToVector3());
+
+            PistaRectaWorlds = new Matrix[]{
+                scale *
+                    Matrix.Identity,
+                scale *
+                    Matrix.CreateTranslation(Vector3.Left * DistanceBetweenStraight), 
+                scale *
+                    Matrix.CreateRotationY(1.5708f) *
+                    Matrix.CreateTranslation((Vector3.Right + Vector3.Backward) * DistanceBetweenStraight * 2),
+            };
+
+            foreach (var mesh in PistaRecta.Meshes)
+            {
+                for (int i = 0; i < PistaRectaWorlds.Length; i++)
+                {
+                    Matrix _pistaRectaWorld = PistaRectaWorlds[i];
+                    Effect.Parameters["World"].SetValue(mesh.ParentBone.Transform * _pistaRectaWorld);
+                    mesh.Draw();
+                }
+            }            
+        }
+
+
     }
 }
+/* Con esto sacaremos el tama�o al hacer (boundingBox.max - boundingBox.min) sobre cada eje y tendremos sus dimensiones,
+ * public BoundingBox GetBounds()
+    {
+        Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+        Vector3 max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+
+        foreach (ModelMesh mesh in this.Model.Meshes)
+        {
+            foreach (ModelMeshPart meshPart in mesh.MeshParts)
+            {
+                int vertexStride = meshPart.VertexBuffer.VertexDeclaration.VertexStride;
+                int vertexBufferSize = meshPart.NumVertices * vertexStride;
+
+                int vertexDataSize = vertexBufferSize / sizeof(float);
+                float[] vertexData = new float[vertexDataSize];
+                meshPart.VertexBuffer.GetData<float>(vertexData);
+
+                for (int i = 0; i < vertexDataSize; i += vertexStride / sizeof(float))
+                {
+                    Vector3 vertex = new Vector3(vertexData[i], vertexData[i + 1], vertexData[i + 2]);
+                    min = Vector3.Min(min, vertex);
+                    max = Vector3.Max(max, vertex);
+                }
+            }
+        }
+
+        return new BoundingBox(min, max);
+    }
+ */
